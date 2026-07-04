@@ -1,5 +1,6 @@
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split
+import joblib
 
 
 def train_model(df):
@@ -15,4 +16,5 @@ def train_model(df):
     model = DecisionTreeClassifier()
 
     model.fit(x_train, y_train)
+    joblib.dump(model, "models/fifa_model.pkl")
     return model, x_test, y_test
