@@ -1,3 +1,4 @@
+from fastapi.middleware.cors import CORSMiddleware
 import joblib
 from pprint import pp
 
@@ -13,7 +14,7 @@ class MatchRequest(BaseModel):
     tournament: str
     city: str
     country: str
-    netural: bool
+    neutral: bool
 
 
 app = FastAPI(
@@ -21,8 +22,16 @@ app = FastAPI(
     description="Predict FIFA World cup match results using Machine Learning ",
     version="1.0.0"
 )
+app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173"],
+                   allow_credentials=True,
+                   allow_methods=["*"],
+                   allow_headers=["*"],
+                   )
+
 model = joblib.load("models/fifa_model.pkl")
 encoder = joblib.load("models/encoder.pkl")
+
+# can make a single end point instead of making too many same endpoints @app.get
 
 
 @app.get("/")
@@ -42,7 +51,7 @@ def get_teams():
 @app.get("/tournaments")
 def get_tournaments():
     return {
-        "tournsments": sorted(encoder["tournament"].classes_.tolist())
+        "tournaments": sorted(encoder["tournament"].classes_.tolist())
     }
 
 
@@ -71,7 +80,17 @@ def neutral():
 @app.post("/predict")
 def predict(data: MatchRequest):
     prediction = predict_match(model, encoder, data.home_team, data.away_team,
-                               data.tournament, data.city, data.country, str(data.netural))
+                               data.tournament, data.city, data.country, str(data.neutral))
+    pred = prediction.strip().lower()
+    if "home" in pred:
+        winner = data.home_team
+    elif "away" in pred:
+        winner = data.away_team
+    elif "draw" in pred:
+        winner = "draw"
+    else:
+        winner = prediction
     return {
-        "prediction": prediction
+        "prediction": winner
+
     }
