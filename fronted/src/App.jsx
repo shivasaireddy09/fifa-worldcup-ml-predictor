@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+const API =
+  "https://fifa-worldcup-api-vu8n.onrender.com";
 
 function App() {
   const [teams, setTeams] = useState([]);
@@ -18,41 +20,43 @@ function App() {
   const [prediction, setPrediction] = useState("");
 
   useEffect(() => {
-    axios.get("http://127.0.0.1:8000/teams")
-      .then(res => setTeams(res.data.teams));
+    axios.get(`${API}/teams`)
+      .then(res => {
 
-    axios.get("http://127.0.0.1:8000/tournaments")
+        setTeams(res.data.teams);
+      });
+
+    axios.get(`${API}/tournaments`)
       .then(res => setTournaments(res.data.tournaments));
 
-    axios.get("http://127.0.0.1:8000/cities")
+    axios.get(`${API}/cities`)
       .then(res => setCities(res.data.cities));
 
-    axios.get("http://127.0.0.1:8000/countries")
+    axios.get(`${API}/countries`)
       .then(res => setCountries(res.data.countries));
 
-    axios.get("http://127.0.0.1:8000/neutral-options")
+    axios.get(`${API}/neutral-options`)
       .then(res => setNeutralOptions(res.data.neutral));
   }, []);
-
   const predictMatch = () => {
-    axios.post("http://127.0.0.1:8000/predict", {
-      home_team: homeTeam,
-      away_team: awayTeam,
-      tournament,
-      city,
-      country,
-      neutral
-    })
-      .then(res => {
+    axios.post(
+      `${API}/predict`,
+      {
+        home_team: homeTeam,
+        away_team: awayTeam,
+        tournament,
+        city,
+        country,
+        neutral,
+      }
+    )
+      .then((res) => {
         setPrediction(res.data.prediction);
-        setWinner(res.data.winner);
       })
-      .catch(err => {
-        console.log(err);
-        alert("Prediction Failed");
+      .catch((err) => {
+        console.error(err);
       });
   };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 text-white flex flex-col items-center py-12 px-4">
 
